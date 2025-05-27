@@ -1,6 +1,6 @@
 ﻿namespace MitFin_Api.Models
 {
-    // Represents a committed material record
+
     public class CommittedMaterial
     {
         public string MatCd { get; set; } = null!;

@@ -1,17 +1,18 @@
 ﻿using MitFin_Api.DBAccess;
+using MitFin_Api.Inventory.Interface;
 using MitFin_Api.Models;
 using Oracle.ManagedDataAccess.Client;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 
-namespace MitFin_Api.Inventory
+namespace MitFin_Api.Inventory.Reposatory
 {
     // Repository implementation for committed materials data access
-    public class CommittedMaterialRepository : CommittedMaterialInterface
+    public class MaterialRepository : MaterialInterface
     {
         private readonly DBConnection _db;
-        public CommittedMaterialRepository(DBConnection db)
+        public MaterialRepository(DBConnection db)
         {
             _db = db;
 
@@ -32,7 +33,7 @@ namespace MitFin_Api.Inventory
                    SELECT comp_id FROM gldeptm WHERE dept_id = T1.dept_id
                  )
                ) 
-               AS region,
+            AS region,
                (
                   SELECT CASE WHEN lvl_no = 60 THEN comp_id ELSE parent_id END
                   FROM glcompm
@@ -41,13 +42,14 @@ namespace MitFin_Api.Inventory
                    SELECT comp_id FROM gldeptm WHERE dept_id = T1.dept_id
                  )
                ) 
-               AS province,
+            AS province,
                (
                 T1.dept_id || ' - ' ||
                (
                SELECT dept_nm FROM gldeptm WHERE dept_id = T1.dept_id)
                ) 
-               AS dept_id,
+
+            AS dept_id,
                T2.MAT_NM,
                T2.unit_price,
                SUM(T1.QTY_ON_HAND) AS committed_cost,
@@ -62,11 +64,10 @@ namespace MitFin_Api.Inventory
                   FROM gldeptm
                   WHERE comp_id IN 
                (
-                     SELECT comp_id
-                     FROM glcompm
-                     WHERE status = 2
-                      AND 
-               (
+                  SELECT comp_id
+                  FROM glcompm
+                  WHERE status = 2
+                      AND (
                         parent_id LIKE 'DISCO%' OR
                         grp_comp  LIKE 'DISCO%' OR
                         comp_id    LIKE 'DISCO%'
